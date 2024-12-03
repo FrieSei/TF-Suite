@@ -1,44 +1,3 @@
-import { CalendarService } from './calendar';
-import { supabaseAdmin } from '@/lib/supabase';
-import { LocationType, CalendarType } from '@/types/calendar';
-
-const calendarService = new CalendarService();
-
-/**
- * List upcoming events for the authenticated user.
- */
-export const listUpcomingEvents = async () => {
-  const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser();
-  if (authError) throw new Error('Authentication error');
-  if (!user) throw new Error('User not authenticated');
-
-  const { data: calendars, error: calendarError } = await supabaseAdmin
-    .from('calendar_integrations')
-    .select('*')
-    .eq('user_id', user.id);
-
-  if (calendarError) throw new Error('Failed to fetch user calendars');
-  if (!calendars?.length) return [];
-
-  const now = new Date();
-  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-
-  const eventsPromises = calendars.map(cal =>
-    calendarService.getSurgeonAvailability(
-      user.id,
-      now,
-      endOfMonth,
-      cal.location as LocationType
-    )
-  );
-
-  const availabilityResults = await Promise.all(eventsPromises);
-  return availabilityResults.flat();
-};
-
-/**
- * Create a new calendar event.
- */
 export const createCalendarEvent = async (
   summary: string,
   description: string,
@@ -46,63 +5,44 @@ export const createCalendarEvent = async (
   endTime: Date,
   attendees?: string[]
 ) => {
+  // Get the authenticated user
   const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser();
-  if (authError) throw new Error('Authentication error');
+  if (authError) throw new Error(`Authentication failed: ${authError.message}`);
   if (!user) throw new Error('User not authenticated');
 
-  const { data: calendar, error: calendarError } = await supabaseAdmin
-    .from('calendar_integrations')
-    .select('*')
-    .eq('user_id', user.id)
-    .limit(1)
-    .single();
+  // Validate required parameters
+  if (!startTime || !endTime) throw new Error('Start time and end time are required');
 
-  if (calendarError || !calendar) throw new Error('No calendars found for the user');
+  // Validate appointment duration (15 minutes to 4 hours)
+  const durationInSeconds = (endTime.getTime() - startTime.getTime()) / 1000;
+  if (durationInSeconds < 900 || durationInSeconds > 14400) {
+    throw new Error(`Invalid appointment duration (${durationInSeconds / 60} minutes). Must be between 15 minutes and 4 hours.`);
+  }
 
+  // Check if the surgeon is available
+  const { data: isAvailable, error: availabilityError } = await supabaseAdmin.rpc(
+    'check_appointment_availability',
+    {
+      p_surgeon_id: user.id,
+      p_location: location,
+      p_start_time: startTime,
+      p_end_time: endTime
+    }
+  );
+
+  if (availabilityError) throw new Error(`Availability check failed: ${availabilityError.message}`);
+  if (!isAvailable) throw new Error('The selected time slot is not available.');
+
+  // Create the appointment
   const appointment = await calendarService.createAppointment(
     user.id,
-    attendees?.[0] || 'guest',
-    calendar.location as LocationType,
+    attendees?.[0] || 'guest', // Using first attendee or default
+    location,
     startTime,
     endTime,
-    calendar.calendar_type as CalendarType,
+    CalendarType.DEFAULT, // Replace with actual calendar type
     description
   );
 
   return appointment;
-};
-
-/**
- * Update an existing calendar event.
- */
-export const updateCalendarEvent = async (
-  eventId: string,
-  summary?: string,
-  description?: string,
-  startTime?: Date,
-  endTime?: Date,
-  attendees?: string[]
-) => {
-  const { data: appointment, error: appointmentError } = await supabaseAdmin
-    .from('appointments')
-    .select('*')
-    .eq('id', eventId)
-    .single();
-
-  if (appointmentError || !appointment) throw new Error(`Appointment with ID ${eventId} not found`);
-
-  const updates = {
-    notes: description,
-    ...(startTime && { start_time: startTime }),
-    ...(endTime && { end_time: endTime })
-  };
-
-  return await calendarService.updateAppointment(eventId, updates);
-};
-
-/**
- * Delete a calendar event.
- */
-export const deleteCalendarEvent = async (eventId: string) => {
-  await calendarService.deleteAppointment(eventId);
 };
