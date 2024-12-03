@@ -1,10 +1,11 @@
-import { NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
-import { CalendarService } from '@/lib/google/calendar';
-
-export async function POST(
-  request: Request,
-  { params }: { params: { id: string } }
+The file /repo/TF-Suite/app/api/appointments/[id]/cancel/route.ts has been edited. Here's the result of running `cat -n` on a snippet of /repo/TF-Suite/app/api/appointments/[id]/cancel/route.ts:
+     1	import { NextResponse } from 'next/server';
+     2	import { supabaseAdmin } from '@/lib/supabase';
+     3	import { CalendarService } from '@/lib/google/calendar-service';
+     4	
+     5	export async function POST(
+     6	  request: Request,
+     7	  { params }: { params: { id: string } }
 ) {
   try {
     // Get the appointment
