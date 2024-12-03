@@ -1,5 +1,42 @@
-// Previous code remains the same until EVENT_TYPES...
+// Represents a location where an event or appointment can take place
+export type LocationType = 'OFFICE' | 'SURGICAL_CENTER' | 'HOSPITAL';
 
+// Represents a specific time slot
+export type TimeSlot = {
+  start: string;
+  end: string;
+  type: string;
+};
+
+// Represents an availability template for scheduling
+export type AvailabilityTemplate = {
+  startTime: string;
+  endTime: string;
+  dayOfWeek: number;
+  location: LocationType;
+  isActive: boolean;
+};
+
+// Categories of events
+export enum EventCategory {
+  CONSULTATION = 'CONSULTATION',
+  MINIMAL_INVASIVE = 'MINIMAL_INVASIVE',
+  SURGICAL = 'SURGICAL',
+}
+
+// Represents a specific type of event
+export type EventType = {
+  id: string;
+  name: string;
+  code: string;
+  duration: number[];
+  requiresAnesthesiologist: boolean;
+  color: string;
+  description: string;
+  category: EventCategory;
+};
+
+// Event type definitions
 export const EVENT_TYPES: Record<string, EventType> = {
   TELE_CONSULT: {
     id: 'tele-consult',
@@ -9,7 +46,7 @@ export const EVENT_TYPES: Record<string, EventType> = {
     requiresAnesthesiologist: false,
     color: '#039BE5',
     description: 'Virtual consultation via telephone',
-    category: 'CONSULTATION'
+    category: EventCategory.CONSULTATION,
   },
   AESTHETIC_CONSULT: {
     id: 'aesthetic-consult',
@@ -19,7 +56,7 @@ export const EVENT_TYPES: Record<string, EventType> = {
     requiresAnesthesiologist: false,
     color: '#7986CB',
     description: 'In-person aesthetic medicine consultation',
-    category: 'CONSULTATION'
+    category: EventCategory.CONSULTATION,
   },
   INJECTABLE: {
     id: 'injectable',
@@ -29,37 +66,36 @@ export const EVENT_TYPES: Record<string, EventType> = {
     requiresAnesthesiologist: false,
     color: '#33B679',
     description: 'Botox and filler procedures',
-    category: 'MINIMAL_INVASIVE'
+    category: EventCategory.MINIMAL_INVASIVE,
   },
-  // Update all surgical procedures to require anesthesiologist
   FACELIFT: {
     id: 'facelift',
     name: 'Facelift Surgery',
     code: 'FACELIFT',
     duration: [180, 240],
-    requiresAnesthesiologist: true, // Always true for surgical procedures
+    requiresAnesthesiologist: true,
     color: '#D50000',
     description: 'Full facelift surgical procedure',
-    category: 'SURGICAL'
+    category: EventCategory.SURGICAL,
   },
   RHINOPLASTY: {
     id: 'rhinoplasty',
     name: 'Rhinoplasty',
     code: 'RHINOPLASTY',
     duration: [120, 180],
-    requiresAnesthesiologist: true, // Always true for surgical procedures
+    requiresAnesthesiologist: true,
     color: '#E67C73',
     description: 'Nose reshaping surgery',
-    category: 'SURGICAL'
+    category: EventCategory.SURGICAL,
   },
   BLEPHAROPLASTY: {
     id: 'blepharoplasty',
     name: 'Blepharoplasty',
     code: 'BLEPHAROPLASTY',
     duration: [90, 120],
-    requiresAnesthesiologist: true, // Always true for surgical procedures
+    requiresAnesthesiologist: true,
     color: '#F4511E',
     description: 'Eyelid surgery',
-    category: 'SURGICAL'
-  }
-};
+    category: EventCategory.SURGICAL,
+  },
+} as const;
