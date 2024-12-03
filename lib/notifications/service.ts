@@ -1,27 +1,10 @@
-import { createTransport } from 'nodemailer';
-import { Twilio } from 'twilio';
 import { NOTIFICATION_TEMPLATES } from './templates';
 import { NotificationChannel, PatientLanguage } from '@/types/medical-practice';
 
 export class NotificationService {
-  private emailTransport;
-  private twilioClient;
-
   constructor() {
-    this.emailTransport = createTransport({
-      host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT || '587'),
-      secure: process.env.SMTP_SECURE === 'true',
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
-      }
-    });
-
-    this.twilioClient = new Twilio(
-      process.env.TWILIO_ACCOUNT_SID!,
-      process.env.TWILIO_AUTH_TOKEN!
-    );
+    // Mock constructor
+    console.log('Notification service initialized in mock mode');
   }
 
   async sendNotification(notification: any) {
@@ -69,19 +52,12 @@ export class NotificationService {
   }
 
   private async sendEmail({ to, subject, html }: { to: string; subject: string; html: string }) {
-    await this.emailTransport.sendMail({
-      from: process.env.EMAIL_FROM,
-      to,
-      subject,
-      html
-    });
+    // Mock email sending
+    console.log('Mock: Sending email', { to, subject, html });
   }
 
   private async sendSMS({ to, body }: { to: string; body: string }) {
-    await this.twilioClient.messages.create({
-      to,
-      from: process.env.TWILIO_PHONE_NUMBER,
-      body
-    });
+    // Mock SMS sending
+    console.log('Mock: Sending SMS', { to, body });
   }
 }
