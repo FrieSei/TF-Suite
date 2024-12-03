@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { GoogleCalendarService } from '@/lib/google/calendar-service';
+import { CalendarService } from '@/lib/google/calendar-service'; // Updated import
 import { supabaseAdmin } from '@/lib/supabase';
 
 export async function POST(request: Request) {
@@ -27,8 +27,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const calendarService = new GoogleCalendarService();
-    
+    const calendarService = new CalendarService(); // Updated instantiation to use CalendarService
+
     // Check availability
     const isAvailable = await calendarService.checkAvailability(
       credentials.access_token,
