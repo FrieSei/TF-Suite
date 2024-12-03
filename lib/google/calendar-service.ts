@@ -124,5 +124,22 @@ export class CalendarService {
     return busyPeriods.length === 0;
   }
 
-  // ... rest of the service methods remain the same
+  async deleteEvent(
+    accessToken: string,
+    calendarId: string,
+    eventId: string
+  ): Promise<void> {
+    try {
+      this.oauth2Client.setCredentials({ access_token: accessToken });
+      const calendar = google.calendar({ version: 'v3', auth: this.oauth2Client });
+
+      await calendar.events.delete({
+        calendarId: calendarId,
+        eventId: eventId,
+      });
+    } catch (error) {
+      console.error('Error deleting calendar event:', error);
+      throw error;
+    }
+  }
 }
