@@ -1,14 +1,20 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
-import { ConsultationStatus, SurgeryStatus } from '@/types/ptl-surgery';
+import { ConsultationStatus } from '@/types/ptl-surgery';
+import { SurgeryStatus } from '@/types/surgery-core';
 
+/**
+ * POST: Schedule a new consultation appointment.
+ * @param request - JSON body containing surgeryId, date, and notes.
+ * @returns The newly created appointment or an error message.
+ */
 export async function POST(request: Request) {
   try {
     const { surgeryId, date, notes } = await request.json();
 
     if (!surgeryId || !date) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { success: false, error: 'Missing required fields' },
         { status: 400 }
       );
     }
@@ -39,23 +45,28 @@ export async function POST(request: Request) {
 
     if (surgeryError) throw surgeryError;
 
-    return NextResponse.json({ appointment });
+    return NextResponse.json({ success: true, appointment });
   } catch (error: any) {
     console.error('Error scheduling consultation:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to schedule consultation' },
+      { success: false, error: error.message || 'Failed to schedule consultation' },
       { status: 500 }
     );
   }
 }
 
+/**
+ * PATCH: Update an existing consultation appointment.
+ * @param request - JSON body containing appointmentId, status, and notes.
+ * @returns The updated appointment or an error message.
+ */
 export async function PATCH(request: Request) {
   try {
     const { appointmentId, status, notes } = await request.json();
 
     if (!appointmentId || !status) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { success: false, error: 'Missing required fields' },
         { status: 400 }
       );
     }
@@ -93,11 +104,11 @@ export async function PATCH(request: Request) {
       if (surgeryError) throw surgeryError;
     }
 
-    return NextResponse.json({ appointment });
+    return NextResponse.json({ success: true, appointment });
   } catch (error: any) {
     console.error('Error updating consultation:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to update consultation' },
+      { success: false, error: error.message || 'Failed to update consultation' },
       { status: 500 }
     );
   }
