@@ -28,11 +28,11 @@ jobs:
         node -v
         npm -v
 
-    - name: Clean install dependencies
+    - name: Install dependencies
       run: |
         rm -rf node_modules
         rm -rf .next
-        npm ci
+        npm install
 
     - name: Build
       run: npm run build
