@@ -1,29 +1,43 @@
-// Import the CalendarService for interacting with Google Calendar
 import { CalendarService } from './calendar';
+import { supabaseAdmin } from '@/lib/supabase';
+import { LocationType, CalendarType } from '@/types/calendar';
 
-// Initialize the CalendarService
 const calendarService = new CalendarService();
 
 /**
- * List upcoming calendar events.
- * Implement this function to fetch and return a list of events based on your needs.
- * You might use the `getSurgeonAvailability` method or other Calendar API methods.
- * @throws Error when not implemented.
+ * List upcoming events for the authenticated user.
  */
 export const listUpcomingEvents = async () => {
-  // To be implemented: Fetch upcoming events logic.
-  throw new Error('Not implemented');
+  const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser();
+  if (authError) throw new Error('Authentication error');
+  if (!user) throw new Error('User not authenticated');
+
+  const { data: calendars, error: calendarError } = await supabaseAdmin
+    .from('calendar_integrations')
+    .select('*')
+    .eq('user_id', user.id);
+
+  if (calendarError) throw new Error('Failed to fetch user calendars');
+  if (!calendars?.length) return [];
+
+  const now = new Date();
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+  const eventsPromises = calendars.map(cal =>
+    calendarService.getSurgeonAvailability(
+      user.id,
+      now,
+      endOfMonth,
+      cal.location as LocationType
+    )
+  );
+
+  const availabilityResults = await Promise.all(eventsPromises);
+  return availabilityResults.flat();
 };
 
 /**
  * Create a new calendar event.
- * This function will map to the `createAppointment` method in CalendarService.
- * @param summary - Title of the event.
- * @param description - Details about the event.
- * @param startTime - Event start time (Date object).
- * @param endTime - Event end time (Date object).
- * @param attendees - Optional list of attendee email addresses.
- * @throws Error when not implemented.
  */
 export const createCalendarEvent = async (
   summary: string,
@@ -32,20 +46,34 @@ export const createCalendarEvent = async (
   endTime: Date,
   attendees?: string[]
 ) => {
-  // To be implemented: Logic for creating a calendar event.
-  throw new Error('Not implemented');
+  const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser();
+  if (authError) throw new Error('Authentication error');
+  if (!user) throw new Error('User not authenticated');
+
+  const { data: calendar, error: calendarError } = await supabaseAdmin
+    .from('calendar_integrations')
+    .select('*')
+    .eq('user_id', user.id)
+    .limit(1)
+    .single();
+
+  if (calendarError || !calendar) throw new Error('No calendars found for the user');
+
+  const appointment = await calendarService.createAppointment(
+    user.id,
+    attendees?.[0] || 'guest',
+    calendar.location as LocationType,
+    startTime,
+    endTime,
+    calendar.calendar_type as CalendarType,
+    description
+  );
+
+  return appointment;
 };
 
 /**
  * Update an existing calendar event.
- * This function will map to the `updateAppointment` method in CalendarService.
- * @param eventId - ID of the event to update.
- * @param summary - Optional new title for the event.
- * @param description - Optional new description for the event.
- * @param startTime - Optional new start time (Date object).
- * @param endTime - Optional new end time (Date object).
- * @param attendees - Optional new list of attendee email addresses.
- * @throws Error when not implemented.
  */
 export const updateCalendarEvent = async (
   eventId: string,
@@ -55,18 +83,26 @@ export const updateCalendarEvent = async (
   endTime?: Date,
   attendees?: string[]
 ) => {
-  // To be implemented: Logic for updating a calendar event.
-  throw new Error('Not implemented');
+  const { data: appointment, error: appointmentError } = await supabaseAdmin
+    .from('appointments')
+    .select('*')
+    .eq('id', eventId)
+    .single();
+
+  if (appointmentError || !appointment) throw new Error(`Appointment with ID ${eventId} not found`);
+
+  const updates = {
+    notes: description,
+    ...(startTime && { start_time: startTime }),
+    ...(endTime && { end_time: endTime })
+  };
+
+  return await calendarService.updateAppointment(eventId, updates);
 };
 
 /**
  * Delete a calendar event.
- * This function will map to the `deleteAppointment` method in CalendarService.
- * @param eventId - ID of the event to delete.
- * @throws Error when not implemented.
  */
 export const deleteCalendarEvent = async (eventId: string) => {
-  // To be implemented: Logic for deleting a calendar event.
-  throw new Error('Not implemented');
+  await calendarService.deleteAppointment(eventId);
 };
-
