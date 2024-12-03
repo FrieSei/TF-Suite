@@ -13,7 +13,7 @@ import { useToast } from "@/components/ui/use-toast";
 interface CreateAppointmentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  surgeonId: string;
+  surgeonId?: string;  // Added the ? here
 }
 
 export function CreateAppointmentDialog({
