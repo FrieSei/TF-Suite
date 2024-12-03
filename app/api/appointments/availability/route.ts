@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { AvailabilityService } from '@/lib/appointments/availability-service';
-import { LocationType, CalendarType } from '@/types/calendar';
+import { LocationType } from '@/types/calendar';
 
 export async function GET(request: Request) {
   try {
@@ -10,7 +10,7 @@ export async function GET(request: Request) {
     const endDate = searchParams.get('endDate');
     const duration = searchParams.get('duration');
     const location = searchParams.get('location') as LocationType;
-    const type = searchParams.get('type') as CalendarType;
+    const type = searchParams.get('type'); // Removed CalendarType
 
     if (!surgeonId || !startDate || !endDate || !duration || !location || !type) {
       return NextResponse.json(
