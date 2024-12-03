@@ -1,10 +1,14 @@
 import { supabaseAdmin } from '@/lib/supabase';
 import { NotificationService } from '@/lib/notifications/service';
 import { addDays, differenceInDays } from 'date-fns';
-import { Surgery, ConsultationStatus, SurgeryStatus } from '@/types/ptl-surgery';
+import { PTLSurgery, ConsultationStatus } from '@/types/ptl-surgery';
+import { Surgery, SurgeryStatus } from '@/types/surgery-core';
 
 const notificationService = new NotificationService();
 
+/**
+ * Trigger notifications related to consultations.
+ */
 export async function triggerConsultationNotifications(): Promise<void> {
   const today = new Date();
   const twoWeeksFromNow = addDays(today, 14);
@@ -22,12 +26,16 @@ export async function triggerConsultationNotifications(): Promise<void> {
 
   if (error) throw error;
 
-  for (const surgery of surgeries) {
+  for (const surgery of surgeries as PTLSurgery[]) {
     await processSurgeryNotifications(surgery);
   }
 }
 
-async function processSurgeryNotifications(surgery: Surgery): Promise<void> {
+/**
+ * Process individual surgery notifications based on its status and timeline.
+ * @param surgery - The PTL surgery record.
+ */
+async function processSurgeryNotifications(surgery: PTLSurgery): Promise<void> {
   const daysToSurgery = differenceInDays(new Date(surgery.surgeryDate), new Date());
 
   // Initial notification at Day -14
@@ -78,70 +86,4 @@ async function processSurgeryNotifications(surgery: Surgery): Promise<void> {
       message: `SURGERY BLOCKED: Consultation requirements not met for ${surgery.patient.name}`
     });
   }
-}
-
-async function sendNotification(notification: {
-  surgeryId: string;
-  type: 'EMAIL' | 'SMS' | 'DASHBOARD';
-  priority: 'HIGH' | 'URGENT' | 'NORMAL';
-  recipients: string[];
-  message: string;
-}): Promise<void> {
-  // Log notification
-  const { error } = await supabaseAdmin
-    .from('ptl_notification_logs')
-    .insert({
-      surgery_id: notification.surgeryId,
-      type: notification.type,
-      priority: notification.priority,
-      recipients: notification.recipients,
-      message: notification.message,
-      status: 'SENT',
-      sent_at: new Date().toISOString()
-    });
-
-  if (error) throw error;
-
-  // Send actual notification
-  if (notification.type === 'EMAIL') {
-    await notificationService.sendEmail({
-      to: notification.recipients,
-      subject: `PTL Surgery Notification - ${notification.priority}`,
-      html: notification.message
-    });
-  } else if (notification.type === 'SMS') {
-    for (const recipient of notification.recipients) {
-      await notificationService.sendSMS({
-        to: recipient,
-        body: notification.message
-      });
-    }
-  }
-}
-
-async function getBackOfficeStaff(): Promise<string[]> {
-  const { data } = await supabaseAdmin
-    .from('profiles')
-    .select('email')
-    .eq('role', 'staff');
-  
-  return data?.map(staff => staff.email) || [];
-}
-
-async function getBackOfficeStaffAndManagers(): Promise<string[]> {
-  const { data } = await supabaseAdmin
-    .from('profiles')
-    .select('email')
-    .in('role', ['staff', 'admin']);
-  
-  return data?.map(staff => staff.email) || [];
-}
-
-async function getAllRelevantStaff(surgery: Surgery): Promise<string[]> {
-  const { data } = await supabaseAdmin
-    .from('profiles')
-    .select('email')
-    .in('role', ['staff', 'admin', 'surgeon']);
-  
-  return data?.map(staff => staff.email) || [];
 }
