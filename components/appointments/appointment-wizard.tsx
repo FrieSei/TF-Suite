@@ -1,10 +1,23 @@
 "use client";
 
-// Previous imports remain the same...
+import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { Select } from '@/components/ui/select';
 import { useWizardValidation } from '@/hooks/use-wizard-validation';
 import { WizardData } from '@/lib/validations/appointment';
+import { LocationType } from '@/types/calendar';
 
-// ... rest of the imports
+interface AppointmentWizardProps {
+  surgeonId?: string;
+  onComplete: (appointment: {
+    eventTypeId: string;
+    startTime: Date;
+    duration: number;
+    location: LocationType;
+    notes?: string;
+  }) => void;
+  onCancel: () => void;
+}
 
 export function AppointmentWizard({ surgeonId, onComplete, onCancel }: AppointmentWizardProps) {
   const queryClient = useQueryClient();
@@ -26,19 +39,18 @@ export function AppointmentWizard({ surgeonId, onComplete, onCancel }: Appointme
     clearErrors
   } = useWizardValidation();
 
-  // ... existing queries and effects remain the same
-
   const handleNext = async () => {
     clearErrors();
-    
+
     const isValid = await validateWizardStep(step, data);
     if (!isValid) return;
 
-    if (step === 1 && selectedEventType) {
+    if (step === 1) {
       if (data.date) {
         const endDate = new Date(data.date);
         endDate.setDate(endDate.getDate() + 7);
-        await fetchAvailableSlots(data.date, endDate, data.duration);
+        // Implement fetchAvailableSlots if needed
+        // await fetchAvailableSlots(data.date, endDate, data.duration);
       }
     }
 
@@ -66,7 +78,6 @@ export function AppointmentWizard({ surgeonId, onComplete, onCancel }: Appointme
     });
   };
 
-  // Update form fields to show validation errors
   const renderField = (name: keyof WizardData, component: React.ReactNode) => {
     const error = getFieldError(name);
     return (
@@ -79,7 +90,6 @@ export function AppointmentWizard({ surgeonId, onComplete, onCancel }: Appointme
     );
   };
 
-  // Update the renderStep function to use renderField
   const renderStep = () => {
     switch (step) {
       case 1:
@@ -92,7 +102,14 @@ export function AppointmentWizard({ surgeonId, onComplete, onCancel }: Appointme
                   value={data.location}
                   onValueChange={(value: LocationType) => setData({ ...data, location: value })}
                 >
-                  {/* ... Select content remains the same ... */}
+                  <Select.Trigger>
+                    <Select.Value placeholder="Select location" />
+                  </Select.Trigger>
+                  <Select.Content>
+                    <Select.Item value="Vienna">Vienna</Select.Item>
+                    <Select.Item value="Graz">Graz</Select.Item>
+                    <Select.Item value="Linz">Linz</Select.Item>
+                  </Select.Content>
                 </Select>
               </>
             ))}
@@ -104,28 +121,75 @@ export function AppointmentWizard({ surgeonId, onComplete, onCancel }: Appointme
                   value={data.eventTypeId}
                   onValueChange={(value) => setData({ ...data, eventTypeId: value, duration: 0 })}
                 >
-                  {/* ... Select content remains the same ... */}
+                  <Select.Trigger>
+                    <Select.Value placeholder="Select procedure type" />
+                  </Select.Trigger>
+                  <Select.Content>
+                    <Select.Item value="consultation">Consultation</Select.Item>
+                    <Select.Item value="surgery">Surgery</Select.Item>
+                    <Select.Item value="followup">Follow-up</Select.Item>
+                  </Select.Content>
                 </Select>
               </>
             ))}
 
-            {selectedEventType && renderField('duration', (
+            {data.eventTypeId && renderField('duration', (
               <>
                 <label className="text-sm font-medium">Duration</label>
                 <Select
                   value={data.duration.toString()}
                   onValueChange={(value) => setData({ ...data, duration: parseInt(value) })}
                 >
-                  {/* ... Select content remains the same ... */}
+                  <Select.Trigger>
+                    <Select.Value placeholder="Select duration" />
+                  </Select.Trigger>
+                  <Select.Content>
+                    <Select.Item value="30">30 minutes</Select.Item>
+                    <Select.Item value="60">1 hour</Select.Item>
+                    <Select.Item value="90">1.5 hours</Select.Item>
+                    <Select.Item value="120">2 hours</Select.Item>
+                  </Select.Content>
                 </Select>
               </>
             ))}
           </div>
         );
 
-      // ... rest of the steps remain similar but updated with renderField
+      default:
+        return null;
     }
   };
 
-  // ... rest of the component remains the same
+  return (
+    <div className="space-y-6">
+      <div className="space-y-4">
+        {renderStep()}
+      </div>
+      <div className="flex justify-end space-x-2">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="px-4 py-2 border rounded-md hover:bg-gray-100"
+        >
+          Cancel
+        </button>
+        {step > 1 && (
+          <button
+            type="button"
+            onClick={() => setStep(prev => prev - 1)}
+            className="px-4 py-2 border rounded-md hover:bg-gray-100"
+          >
+            Back
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={step === 3 ? handleSubmit : handleNext}
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+        >
+          {step === 3 ? 'Submit' : 'Next'}
+        </button>
+      </div>
+    </div>
+  );
 }
