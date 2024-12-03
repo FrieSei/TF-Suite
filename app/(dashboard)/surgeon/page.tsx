@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar, Users, Clock, AlertCircle } from 'lucide-react';
 import { AppointmentList } from '@/components/appointments/appointment-list';
 import { CreateAppointmentDialog } from '@/components/appointments/create-appointment-dialog';
-import { useAuth } from '@/hooks/use-auth';
+import { useAuth } from '@/contexts/auth-context';
 import { useState } from 'react';
 
 export default function SurgeonDashboard() {
