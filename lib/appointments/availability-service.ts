@@ -1,5 +1,5 @@
 import { supabaseAdmin } from '@/lib/supabase';
-import { LocationType, CalendarType, TimeSlot, AvailabilityTemplate } from '@/types/calendar';
+import { LocationType, TimeSlot, AvailabilityTemplate } from '@/types/calendar';
 
 export class AvailabilityService {
   async checkAvailability(
@@ -43,7 +43,7 @@ export class AvailabilityService {
     location: LocationType
   ): Promise<boolean> {
     const dayOfWeek = startTime.getDay();
-    
+
     const { data: templates, error } = await supabaseAdmin
       .from('availability_templates')
       .select('*')
@@ -94,7 +94,7 @@ export class AvailabilityService {
     endDate: Date,
     duration: number,
     location: LocationType,
-    appointmentType: CalendarType
+    appointmentType: string
   ): Promise<TimeSlot[]> {
     const availableSlots: TimeSlot[] = [];
     let currentDate = new Date(startDate);
@@ -122,7 +122,7 @@ export class AvailabilityService {
 
         while (slotStart < templateEnd) {
           const slotEnd = new Date(slotStart.getTime() + duration * 60000);
-          
+
           if (slotEnd <= templateEnd) {
             const isAvailable = await this.checkAvailability(
               surgeonId,
@@ -139,7 +139,7 @@ export class AvailabilityService {
               });
             }
           }
-          
+
           slotStart = new Date(slotStart.getTime() + duration * 60000);
         }
       }
