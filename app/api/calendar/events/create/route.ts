@@ -60,11 +60,27 @@ export async function POST(request: Request) {
       );
     }
 
+    // Format the event data
+    const formattedEvent = {
+      summary: eventData.title,
+      description: eventData.description,
+      location: eventData.location,
+      start: {
+        dateTime: startTime.toISOString(),
+        timeZone: 'UTC',
+      },
+      end: {
+        dateTime: endTime.toISOString(),
+        timeZone: 'UTC',
+      },
+      attendees: eventData.attendees?.map((email: string) => ({ email })),
+    };
+
     // Create the event
-    const event = await calendarService.createEventWithType(
+    const event = await calendarService.createEvent(
       credentials.access_token,
       calendarId,
-      eventData
+      formattedEvent
     );
 
     return NextResponse.json({ event });
