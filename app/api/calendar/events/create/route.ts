@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { CalendarService } from '@/lib/google/calendar-service'; // Updated import
+import { CalendarService } from '@/lib/google/calendar-service';
 import { supabaseAdmin } from '@/lib/supabase';
 
 export async function POST(request: Request) {
@@ -27,14 +27,28 @@ export async function POST(request: Request) {
       );
     }
 
-    const calendarService = new CalendarService(); // Updated instantiation to use CalendarService
+    const calendarService = new CalendarService();
 
-    // Check availability
+    // Create startTime Date object from input string
+    const startTime = new Date(eventData.startTime);
+
+    // Validate startTime
+    if (isNaN(startTime.getTime())) {
+      return NextResponse.json(
+        { error: 'Invalid startTime format' },
+        { status: 400 }
+      );
+    }
+
+    // Calculate endTime based on startTime and duration
+    const endTime = new Date(startTime.getTime() + eventData.duration * 60000);
+
+    // Check availability using startTime and endTime
     const isAvailable = await calendarService.checkAvailability(
       credentials.access_token,
       calendarId,
-      eventData.startTime,
-      new Date(new Date(eventData.startTime).getTime() + eventData.duration * 60000).toISOString(),
+      startTime,
+      endTime,
       eventData.eventTypeCode,
       eventData.anesthesiologistId
     );
