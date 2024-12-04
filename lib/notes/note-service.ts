@@ -13,8 +13,6 @@ export class ClinicalNoteService {
     this.auditLogger = new AuditLogger();
   }
 
-  // Existing methods remain unchanged...
-
   async addAttachment(
     noteId: string,
     file: Buffer,
@@ -22,7 +20,6 @@ export class ClinicalNoteService {
     metadata: any
   ) {
     try {
-      // Verify note exists
       const { data: note } = await supabaseAdmin
         .from('patient_clinical_notes')
         .select('id, surgeon_id')
@@ -33,16 +30,13 @@ export class ClinicalNoteService {
         throw new Error('Note not found');
       }
 
-      // Encrypt file content
       const { encryptedContent, iv, authTag } = await this.encryptionService.encryptNote(
         file.toString('base64')
       );
 
-      // Encrypt metadata
       const { encryptedContent: encryptedMeta, iv: metaIv, authTag: metaAuthTag } =
         await this.encryptionService.encryptNote(JSON.stringify(metadata));
 
-      // Insert attachment
       const { data: attachment, error } = await supabaseAdmin
         .from('note_attachments')
         .insert({
@@ -59,9 +53,8 @@ export class ClinicalNoteService {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error || !attachment) throw new Error('Failed to add attachment');
 
-      // Log attachment creation
       await this.auditLogger.log({
         operation: 'NOTE_ATTACHMENT_ADDED',
         userId: note.surgeon_id,
@@ -81,7 +74,6 @@ export class ClinicalNoteService {
 
   async getAttachment(attachmentId: string) {
     try {
-      // Get attachment
       const { data: attachment, error } = await supabaseAdmin
         .from('note_attachments')
         .select('*')
@@ -91,14 +83,12 @@ export class ClinicalNoteService {
       if (error) throw error;
       if (!attachment) throw new Error('Attachment not found');
 
-      // Decrypt file content
       const fileContent = await this.encryptionService.decryptNote(
         attachment.encrypted_file,
         attachment.iv,
         attachment.auth_tag
       );
 
-      // Decrypt metadata
       const decryptedMetadata = await this.encryptionService.decryptNote(
         attachment.encrypted_metadata,
         attachment.meta_iv,
@@ -115,28 +105,34 @@ export class ClinicalNoteService {
       throw error;
     }
   }
-}
 
-async getNoteHistory(noteId: string) {
-  try {
-    const { data, error } = await supabaseAdmin
-      .from('patient_clinical_notes_history')
-      .select('*')
-      .eq('note_id', noteId)
-      .order('created_at', { ascending: false });
+  async getNoteHistory(noteId: string) {
+    try {
+      const { data, error } = await supabaseAdmin
+        .from('patient_clinical_notes_history')
+        .select('*')
+        .eq('note_id', noteId)
+        .order('created_at', { ascending: false });
 
-    if (error) throw error;
+      if (error) throw error;
 
-    return data.map(async (entry) => ({
-      ...entry,
-      content: await this.encryptionService.decryptNote(
-        entry.encrypted_content,
-        entry.iv,
-        entry.auth_tag
-      ),
-    }));
-  } catch (error) {
-    console.error('Error fetching note history:', error);
-    throw error;
+      if (!data || data.length === 0) {
+        return [];
+      }
+
+      return await Promise.all(
+        data.map(async (entry) => ({
+          ...entry,
+          content: await this.encryptionService.decryptNote(
+            entry.encrypted_content,
+            entry.iv,
+            entry.auth_tag
+          ),
+        }))
+      );
+    } catch (error) {
+      console.error('Error fetching note history:', error);
+      throw error;
+    }
   }
 }
