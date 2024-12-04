@@ -1,3 +1,4 @@
+import { supabaseAdmin } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import { ReferenceService } from '@/lib/notes/reference-service';
 
