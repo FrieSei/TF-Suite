@@ -115,7 +115,6 @@ export class ClinicalNoteService {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-
       if (!data || data.length === 0) {
         return [];
       }
@@ -132,6 +131,92 @@ export class ClinicalNoteService {
       );
     } catch (error) {
       console.error('Error fetching note history:', error);
+      throw error;
+    }
+  }
+
+  async getNotesByPatient(patientId: string) {
+    try {
+      const { data: notes, error } = await supabaseAdmin
+        .from('patient_clinical_notes')
+        .select('*')
+        .eq('patient_id', patientId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      return await Promise.all(
+        notes.map(async (note) => ({
+          ...note,
+          content: await this.encryptionService.decryptNote(
+            note.encrypted_content,
+            note.iv,
+            note.auth_tag
+          ),
+        }))
+      );
+    } catch (error) {
+      console.error('Error fetching notes by patient:', error);
+      throw error;
+    }
+  }
+
+  async updateNote(noteId: string, content: string, metadata: any) {
+    try {
+      const { data: note } = await supabaseAdmin
+        .from('patient_clinical_notes')
+        .select('id')
+        .eq('id', noteId)
+        .single();
+
+      if (!note) {
+        throw new Error('Note not found');
+      }
+
+      const { encryptedContent, iv, authTag } = await this.encryptionService.encryptNote(content);
+
+      const { encryptedContent: encryptedMeta, iv: metaIv, authTag: metaAuthTag } =
+        await this.encryptionService.encryptNote(JSON.stringify(metadata));
+
+      const { data, error } = await supabaseAdmin
+        .from('patient_clinical_notes')
+        .update({
+          encrypted_content: encryptedContent,
+          iv,
+          auth_tag: authTag,
+          encrypted_metadata: encryptedMeta,
+          meta_iv: metaIv,
+          meta_auth_tag: metaAuthTag,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', noteId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return data;
+    } catch (error) {
+      console.error('Error updating note:', error);
+      throw error;
+    }
+  }
+
+  async deleteNote(noteId: string) {
+    try {
+      const { error } = await supabaseAdmin
+        .from('patient_clinical_notes')
+        .delete()
+        .eq('id', noteId);
+
+      if (error) throw error;
+
+      await this.auditLogger.log({
+        operation: 'NOTE_DELETED',
+        metadata: { noteId, timestamp: new Date().toISOString() },
+      });
+    } catch (error) {
+      console.error('Error deleting note:', error);
       throw error;
     }
   }
