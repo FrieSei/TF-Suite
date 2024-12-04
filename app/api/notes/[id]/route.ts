@@ -1,3 +1,4 @@
+import { supabaseAdmin } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import { ClinicalNoteService } from '@/lib/notes/note-service';
 
