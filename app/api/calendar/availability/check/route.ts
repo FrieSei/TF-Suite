@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
-import { EVENT_TYPES } from '@/types/calendar';
+import { EVENT_TYPES, CalendarType } from '@/types/calendar';
 import { AnesthesiologistService } from '@/lib/google/anesthesiologist-service';
 import { CalendarService } from '@/lib/google/calendar-service';
 
@@ -67,7 +67,7 @@ export async function POST(request: Request) {
 
     // Check for anesthesiologist requirement
     const requiresAnesthesiologist =
-      eventType.category === 'SURGICAL' || eventType.requiresAnesthesiologist;
+      eventType.category === CalendarType.SURGERY || eventType.requiresAnesthesiologist;
 
     // Check surgeon availability
     const endDateTime = new Date(startDateTime.getTime() + durationNum * 60000);
