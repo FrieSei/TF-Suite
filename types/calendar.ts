@@ -1,5 +1,7 @@
 import { LocationType, CalendarType, AppointmentStatus } from './enums';
 
+export { LocationType, CalendarType, AppointmentStatus };
+
 // Represents a specific time slot
 export type TimeSlot = {
   start: string;
