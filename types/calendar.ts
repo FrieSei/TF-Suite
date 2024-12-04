@@ -1,5 +1,4 @@
-// Represents a location where an event or appointment can take place
-export type LocationType = 'OFFICE' | 'SURGICAL_CENTER' | 'HOSPITAL';
+import { LocationType, CalendarType, AppointmentStatus } from './enums';
 
 // Represents a specific time slot
 export type TimeSlot = {
@@ -17,13 +16,6 @@ export type AvailabilityTemplate = {
   isActive: boolean;
 };
 
-// Categories of events
-export enum EventCategory {
-  CONSULTATION = 'CONSULTATION',
-  MINIMAL_INVASIVE = 'MINIMAL_INVASIVE',
-  SURGICAL = 'SURGICAL',
-}
-
 // Represents a specific type of event
 export type EventType = {
   id: string;
@@ -33,7 +25,7 @@ export type EventType = {
   requiresAnesthesiologist: boolean;
   color: string;
   description: string;
-  category: EventCategory;
+  category: CalendarType;
 };
 
 // Event type definitions
@@ -46,7 +38,7 @@ export const EVENT_TYPES: Record<string, EventType> = {
     requiresAnesthesiologist: false,
     color: '#039BE5',
     description: 'Virtual consultation via telephone',
-    category: EventCategory.CONSULTATION,
+    category: CalendarType.CONSULTATION,
   },
   AESTHETIC_CONSULT: {
     id: 'aesthetic-consult',
@@ -56,7 +48,7 @@ export const EVENT_TYPES: Record<string, EventType> = {
     requiresAnesthesiologist: false,
     color: '#7986CB',
     description: 'In-person aesthetic medicine consultation',
-    category: EventCategory.CONSULTATION,
+    category: CalendarType.CONSULTATION,
   },
   INJECTABLE: {
     id: 'injectable',
@@ -66,7 +58,7 @@ export const EVENT_TYPES: Record<string, EventType> = {
     requiresAnesthesiologist: false,
     color: '#33B679',
     description: 'Botox and filler procedures',
-    category: EventCategory.MINIMAL_INVASIVE,
+    category: CalendarType.GENERAL,
   },
   FACELIFT: {
     id: 'facelift',
@@ -76,7 +68,7 @@ export const EVENT_TYPES: Record<string, EventType> = {
     requiresAnesthesiologist: true,
     color: '#D50000',
     description: 'Full facelift surgical procedure',
-    category: EventCategory.SURGICAL,
+    category: CalendarType.SURGERY,
   },
   RHINOPLASTY: {
     id: 'rhinoplasty',
@@ -86,7 +78,7 @@ export const EVENT_TYPES: Record<string, EventType> = {
     requiresAnesthesiologist: true,
     color: '#E67C73',
     description: 'Nose reshaping surgery',
-    category: EventCategory.SURGICAL,
+    category: CalendarType.SURGERY,
   },
   BLEPHAROPLASTY: {
     id: 'blepharoplasty',
@@ -96,6 +88,6 @@ export const EVENT_TYPES: Record<string, EventType> = {
     requiresAnesthesiologist: true,
     color: '#F4511E',
     description: 'Eyelid surgery',
-    category: EventCategory.SURGICAL,
+    category: CalendarType.SURGERY,
   },
 } as const;
