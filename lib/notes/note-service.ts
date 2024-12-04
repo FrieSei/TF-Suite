@@ -116,3 +116,27 @@ export class ClinicalNoteService {
     }
   }
 }
+
+async getNoteHistory(noteId: string) {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('patient_clinical_notes_history')
+      .select('*')
+      .eq('note_id', noteId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    return data.map(async (entry) => ({
+      ...entry,
+      content: await this.encryptionService.decryptNote(
+        entry.encrypted_content,
+        entry.iv,
+        entry.auth_tag
+      ),
+    }));
+  } catch (error) {
+    console.error('Error fetching note history:', error);
+    throw error;
+  }
+}
