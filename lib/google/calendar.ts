@@ -48,7 +48,7 @@ export class CalendarService {
     const calendar = await this.calendar.calendars.insert({
       requestBody: {
         summary: name,
-        description: description,
+        description,
         timeZone: 'Europe/Vienna', // Default timezone for Austria
       },
     });
@@ -120,8 +120,11 @@ export class CalendarService {
       ])
       .single();
 
-    if (!appointment) throw new Error(`Failed to save appointment to the database`);
+    if (!appointment) throw new Error('Failed to save appointment to the database');
 
     return appointment as Appointment;
   }
 }
+
+export const calendarService = new CalendarService();
+export const createCalendar = calendarService.createCalendar.bind(calendarService);
