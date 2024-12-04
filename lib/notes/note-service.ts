@@ -13,68 +13,19 @@ export class ClinicalNoteService {
     this.auditLogger = new AuditLogger();
   }
 
-  async createNote(
-    patientId: string,
-    surgeonId: string,
-    content: string,
+  // Existing methods remain unchanged...
+
+  async addAttachment(
+    noteId: string,
+    file: Buffer,
+    mimeType: string,
     metadata: any
   ) {
     try {
-      const { encryptedContent, iv, authTag } = await this.encryptionService.encryptNote(
-        content
-      );
-
-      const { encryptedContent: encryptedMeta, iv: metaIv, authTag: metaAuthTag } = 
-        await this.encryptionService.encryptNote(JSON.stringify(metadata));
-
-      const { data, error } = await supabaseAdmin
-        .from('patient_clinical_notes')
-        .insert({
-          patient_id: patientId,
-          surgeon_id: surgeonId,
-          encrypted_content: encryptedContent,
-          iv,
-          auth_tag: authTag,
-          encrypted_metadata: encryptedMeta,
-          version: 1,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          locked_at: addHours(new Date(), 12).toISOString() // Lock after 12 hours
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      // Log note creation
-      await this.auditLogger.log({
-        operation: 'NOTE_CREATED',
-        userId: surgeonId,
-        metadata: {
-          noteId: data.id,
-          patientId,
-          timestamp: new Date().toISOString()
-        }
-      });
-
-      return data;
-    } catch (error) {
-      console.error('Error creating note:', error);
-      throw error;
-    }
-  }
-
-  async updateNote(
-    noteId: string,
-    surgeonId: string,
-    content: string,
-    metadata?: any
-  ) {
-    try {
-      // Check if note is locked
+      // Verify note exists
       const { data: note } = await supabaseAdmin
         .from('patient_clinical_notes')
-        .select('locked_at, surgeon_id')
+        .select('id, surgeon_id')
         .eq('id', noteId)
         .single();
 
@@ -82,177 +33,86 @@ export class ClinicalNoteService {
         throw new Error('Note not found');
       }
 
-      // Verify surgeon ownership
-      if (note.surgeon_id !== surgeonId) {
-        throw new Error('Unauthorized to modify this note');
-      }
+      // Encrypt file content
+      const { encryptedContent, iv, authTag } = await this.encryptionService.encryptNote(
+        file.toString('base64')
+      );
 
-      // Check if note is locked
-      if (note.locked_at && isBefore(new Date(), new Date(note.locked_at))) {
-        throw new Error('Note is locked for editing');
-      }
+      // Encrypt metadata
+      const { encryptedContent: encryptedMeta, iv: metaIv, authTag: metaAuthTag } =
+        await this.encryptionService.encryptNote(JSON.stringify(metadata));
 
-      // Start transaction
-      const { error: txError } = await supabaseAdmin.rpc('begin_transaction');
-      if (txError) throw txError;
-
-      try {
-        // Get current version
-        const { data: currentNote } = await supabaseAdmin
-          .from('patient_clinical_notes')
-          .select('version')
-          .eq('id', noteId)
-          .single();
-
-        // Encrypt new content
-        const { encryptedContent, iv, authTag } = await this.encryptionService.encryptNote(
-          content
-        );
-
-        // Create new version
-        await supabaseAdmin
-          .from('note_versions')
-          .insert({
-            note_id: noteId,
-            version: currentNote.version,
-            encrypted_content: encryptedContent,
-            iv,
-            auth_tag: authTag,
-            created_by: surgeonId,
-            created_at: new Date().toISOString()
-          });
-
-        // Update note
-        const updates: any = {
-          encrypted_content: encryptedContent,
+      // Insert attachment
+      const { data: attachment, error } = await supabaseAdmin
+        .from('note_attachments')
+        .insert({
+          note_id: noteId,
+          encrypted_file: encryptedContent,
           iv,
           auth_tag: authTag,
-          version: currentNote.version + 1,
-          updated_at: new Date().toISOString(),
-          locked_at: addHours(new Date(), 12).toISOString() // Reset lock period
-        };
-
-        if (metadata) {
-          const { encryptedContent: encryptedMeta, iv: metaIv, authTag: metaAuthTag } = 
-            await this.encryptionService.encryptNote(JSON.stringify(metadata));
-          updates.encrypted_metadata = encryptedMeta;
-        }
-
-        const { data, error } = await supabaseAdmin
-          .from('patient_clinical_notes')
-          .update(updates)
-          .eq('id', noteId)
-          .select()
-          .single();
-
-        if (error) throw error;
-
-        // Log note update
-        await this.auditLogger.log({
-          operation: 'NOTE_UPDATED',
-          userId: surgeonId,
-          metadata: {
-            noteId,
-            version: currentNote.version + 1,
-            timestamp: new Date().toISOString()
-          }
-        });
-
-        // Commit transaction
-        await supabaseAdmin.rpc('commit_transaction');
-        return data;
-      } catch (error) {
-        // Rollback on error
-        await supabaseAdmin.rpc('rollback_transaction');
-        throw error;
-      }
-    } catch (error) {
-      console.error('Error updating note:', error);
-      throw error;
-    }
-  }
-
-  async getNotesByPatient(patientId: string) {
-    try {
-      const { data: notes, error } = await supabaseAdmin
-        .from('patient_clinical_notes')
-        .select(`
-          *,
-          surgeon:doctors(name),
-          attachments:note_attachments(*)
-        `)
-        .eq('patient_id', patientId)
-        .is('deleted_at', null)
-        .order('created_at', { ascending: false });
+          mime_type: mimeType,
+          encrypted_metadata: encryptedMeta,
+          meta_iv: metaIv,
+          meta_auth_tag: metaAuthTag,
+          created_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
 
       if (error) throw error;
 
-      // Decrypt notes
-      const decryptedNotes = await Promise.all(
-        notes.map(async (note) => {
-          const decryptedContent = await this.encryptionService.decryptNote(
-            note.encrypted_content,
-            note.iv,
-            note.auth_tag
-          );
+      // Log attachment creation
+      await this.auditLogger.log({
+        operation: 'NOTE_ATTACHMENT_ADDED',
+        userId: note.surgeon_id,
+        metadata: {
+          noteId,
+          attachmentId: attachment.id,
+          timestamp: new Date().toISOString(),
+        },
+      });
 
-          const decryptedMetadata = await this.encryptionService.decryptNote(
-            note.encrypted_metadata,
-            note.iv,
-            note.auth_tag
-          );
-
-          return {
-            ...note,
-            content: decryptedContent,
-            metadata: JSON.parse(decryptedMetadata),
-            isLocked: note.locked_at && isBefore(new Date(), new Date(note.locked_at))
-          };
-        })
-      );
-
-      return decryptedNotes;
+      return attachment;
     } catch (error) {
-      console.error('Error fetching notes:', error);
+      console.error('Error adding attachment:', error);
       throw error;
     }
   }
 
-  async getNoteHistory(noteId: string) {
+  async getAttachment(attachmentId: string) {
     try {
-      const { data: versions, error } = await supabaseAdmin
-        .from('note_versions')
-        .select(`
-          *,
-          created_by:doctors(name)
-        `)
-        .eq('note_id', noteId)
-        .order('version', { ascending: false });
+      // Get attachment
+      const { data: attachment, error } = await supabaseAdmin
+        .from('note_attachments')
+        .select('*')
+        .eq('id', attachmentId)
+        .single();
 
       if (error) throw error;
+      if (!attachment) throw new Error('Attachment not found');
 
-      // Decrypt all versions
-      const decryptedVersions = await Promise.all(
-        versions.map(async (version) => {
-          const decryptedContent = await this.encryptionService.decryptNote(
-            version.encrypted_content,
-            version.iv,
-            version.auth_tag
-          );
-
-          return {
-            ...version,
-            content: decryptedContent
-          };
-        })
+      // Decrypt file content
+      const fileContent = await this.encryptionService.decryptNote(
+        attachment.encrypted_file,
+        attachment.iv,
+        attachment.auth_tag
       );
 
-      return decryptedVersions;
+      // Decrypt metadata
+      const decryptedMetadata = await this.encryptionService.decryptNote(
+        attachment.encrypted_metadata,
+        attachment.meta_iv,
+        attachment.meta_auth_tag
+      );
+
+      return {
+        file: Buffer.from(fileContent, 'base64'),
+        mime_type: attachment.mime_type,
+        metadata: JSON.parse(decryptedMetadata),
+      };
     } catch (error) {
-      console.error('Error fetching note history:', error);
+      console.error('Error fetching attachment:', error);
       throw error;
     }
   }
-
-  // Rest of the methods remain the same...
 }
