@@ -75,6 +75,39 @@ export class CalendarService {
     return data as CalendarIntegration;
   }
 
+  async deleteAppointment(eventId: string) {
+    const auth = await this.getAuthForUser('system');
+    this.calendar = google.calendar({ version: 'v3', auth });
+
+    await this.calendar.events.delete({
+      calendarId: 'primary',
+      eventId: eventId,
+    });
+  }
+
+  async updateAppointment(
+    eventId: string,
+    summary?: string,
+    description?: string,
+    startTime?: string,
+    endTime?: string
+  ) {
+    const auth = await this.getAuthForUser('system');
+    this.calendar = google.calendar({ version: 'v3', auth });
+
+    const requestBody: any = {};
+    if (summary) requestBody.summary = summary;
+    if (description) requestBody.description = description;
+    if (startTime) requestBody.start = { dateTime: startTime, timeZone: 'Europe/Vienna' };
+    if (endTime) requestBody.end = { dateTime: endTime, timeZone: 'Europe/Vienna' };
+
+    await this.calendar.events.update({
+      calendarId: 'primary',
+      eventId: eventId,
+      requestBody,
+    });
+  }
+
   async scheduleAppointment(
     userId: string,
     location: LocationType,
