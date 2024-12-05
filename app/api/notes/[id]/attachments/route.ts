@@ -52,7 +52,7 @@ export async function GET(
     }
 
     const attachment = await noteService.getAttachment(attachmentId);
-    
+
     return new NextResponse(attachment.file, {
       headers: {
         'Content-Type': attachment.mime_type,
