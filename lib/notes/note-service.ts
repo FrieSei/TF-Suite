@@ -67,7 +67,6 @@ export class ClinicalNoteService {
     }
   }
 
-  // Other methods remain unchanged...
   async addAttachment(
     noteId: string,
     file: Buffer,
@@ -78,7 +77,29 @@ export class ClinicalNoteService {
   }
 
   async getAttachment(attachmentId: string) {
-    // Method implementation...
+    try {
+      // Fetch the attachment from your database
+      const { data: attachment, error } = await supabaseAdmin
+        .from('note_attachments') // Replace with the actual table name
+        .select('file, mime_type, metadata') // Ensure these fields exist in the table
+        .eq('id', attachmentId)
+        .single();
+
+      if (error) {
+        console.error('Failed to fetch attachment:', error);
+        throw new Error('Attachment not found');
+      }
+
+      // Return the attachment object
+      return {
+        file: Buffer.from(attachment.file, 'base64'), // Adjust based on how the file is stored
+        mime_type: attachment.mime_type,
+        metadata: JSON.parse(attachment.metadata), // Parse metadata if stored as JSON
+      };
+    } catch (error) {
+      console.error('Error in getAttachment:', error);
+      throw error;
+    }
   }
 
   async getNoteHistory(noteId: string) {
