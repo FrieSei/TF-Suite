@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server';
+import { supabaseAdmin } from '@/lib/supabase';
 import { ClinicalNoteService } from '@/lib/notes/note-service';
 
 const noteService = new ClinicalNoteService();
+
+if (!supabaseAdmin) {
+  throw new Error('Supabase client is not initialized. Check your configuration.');
+}
 
 export async function POST(request: Request) {
   try {
@@ -23,6 +28,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ note });
   } catch (error: any) {
+    console.error('Error in POST /api/notes:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to create note' },
       { status: 500 }
@@ -51,10 +57,14 @@ export async function GET(request: Request) {
       .is('deleted_at', null)
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase query error:', error);
+      throw error;
+    }
 
     return NextResponse.json({ notes });
   } catch (error: any) {
+    console.error('Error in GET /api/notes:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to fetch notes' },
       { status: 500 }
