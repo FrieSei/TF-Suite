@@ -30,9 +30,11 @@ interface UserData {
   email: string;
 }
 
+type Status = "loading" | "validating" | "success" | "error" | "submitting";
+
 export default function InvitationResponse() {
   const router = useRouter();
-  const [status, setStatus] = useState<"loading" | "validating" | "success" | "error">("loading");
+  const [status, setStatus] = useState<Status>("loading");
   const [message, setMessage] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -83,7 +85,7 @@ export default function InvitationResponse() {
     e.preventDefault();
 
     if (!canSubmit || !userData) return;
-    setStatus("loading");
+    setStatus("submitting");
 
     try {
       const token = new URLSearchParams(window.location.search).get("invitation_token");
@@ -107,14 +109,14 @@ export default function InvitationResponse() {
     }
   };
 
-  if (status === "loading") {
+  if (status === "loading" || status === "submitting") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Card className="w-full max-w-md">
           <CardContent className="p-6">
             <div className="flex items-center justify-center space-x-2">
               <Loader2 className="h-6 w-6 animate-spin" />
-              <span>Validating invitation...</span>
+              <span>{status === "loading" ? "Validating invitation..." : "Setting up account..."}</span>
             </div>
           </CardContent>
         </Card>
@@ -174,8 +176,8 @@ export default function InvitationResponse() {
                 <AlertDescription>{message}</AlertDescription>
               </Alert>
             )}
-            <Button type="submit" className="w-full" disabled={!canSubmit || status === "loading"}>
-              {status === "loading" ? (
+            <Button type="submit" className="w-full" disabled={!canSubmit || status === "submitting"}>
+              {status === "submitting" ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Setting up...
