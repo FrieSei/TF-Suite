@@ -240,7 +240,7 @@ export default function InvitationResponse() {
               </div>
             </div>
 
-              {status === "success" && (
+            {status === "success" && (
               <Alert>
                 <AlertDescription>{message}</AlertDescription>
               </Alert>
