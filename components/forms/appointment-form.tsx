@@ -67,22 +67,47 @@ export function AppointmentForm({ onSuccess, selectedDate }: AppointmentFormProp
   });
 
   const getProceduresForType = (type: AppointmentType) => {
-    if (type === 'consultation') return ['Initial Consultation'];
-    return Object.keys(PROCEDURE_TYPES[type]);
-  };
+  if (type === 'consultation') return ['Initial Consultation'];
+  return Object.keys(PROCEDURE_TYPES[type]);
+};
 
-  const onAppointmentTypeChange = (type: AppointmentType) => {
-    setSelectedType(type);
-    const procedures = getProceduresForType(type);
-    form.setValue('procedure', procedures[0]);
+const onAppointmentTypeChange = (type: AppointmentType) => {
+  setSelectedType(type);
+  const procedures = getProceduresForType(type);
+  form.setValue('appointment_type', type);
+  form.setValue('procedure', procedures[0]);
+  
+  if (type === 'consultation') {
+    form.setValue('duration', PROCEDURE_TYPES.consultation.duration);
+  } else {
+    const procedureCategory = PROCEDURE_TYPES[type];
+    const selectedProcedure = procedures[0];
     
-    if (type === 'consultation') {
-      form.setValue('duration', PROCEDURE_TYPES.consultation.duration);
-    } else {
-      const procedure = PROCEDURE_TYPES[type][procedures[0]];
-      form.setValue('duration', procedure.duration);
+    if (selectedProcedure && selectedProcedure in procedureCategory) {
+      form.setValue('duration', procedureCategory[selectedProcedure as keyof typeof procedureCategory].duration);
     }
-  };
+  }
+};
+
+{selectedType === 'consultation' 
+  ? PROCEDURE_TYPES.consultation.timeSlots.map((time) => (
+      <SelectItem key={time} value={time}>
+        {time}
+      </SelectItem>
+    ))
+  : (() => {
+      const currentProcedure = form.getValues('procedure');
+      const procedureCategory = PROCEDURE_TYPES[selectedType];
+      if (currentProcedure && currentProcedure in procedureCategory) {
+        return procedureCategory[currentProcedure as keyof typeof procedureCategory].timeSlots.map((time) => (
+          <SelectItem key={time} value={time}>
+            {time}
+          </SelectItem>
+        ));
+      }
+      return null;
+    })()
+}
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
