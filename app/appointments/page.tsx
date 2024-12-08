@@ -41,7 +41,7 @@ export default function AppointmentsPage() {
             className="rounded-md border"
           />
         </div>
-        <AppointmentList selectedDate={selectedDate} />
+        <AppointmentList date={selectedDate} />
       </div>
 
       <CreateAppointmentDialog
