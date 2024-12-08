@@ -156,3 +156,58 @@ export interface PracticeNotificationSettings {
     };
   };
 }
+
+// Add procedure-related types
+type ProcedureInfo = {
+  duration: number;
+  timeSlots: string[];
+  requiredStaff: string[];
+  equipment: string[];
+};
+
+type ConsultationType = {
+  duration: number;
+  timeSlots: string[];
+  requiredStaff?: string[];
+  equipment?: string[];
+};
+
+type SurgicalProcedures = {
+  "Deep Plane Facelift": ProcedureInfo;
+  "Mini Facelift": ProcedureInfo;
+};
+
+type MinimalProcedures = {
+  "Botox": ProcedureInfo;
+};
+
+export const PROCEDURE_TYPES = {
+  surgery: {
+    "Deep Plane Facelift": {
+      duration: 240,
+      timeSlots: ['08:00'],
+      requiredStaff: ['surgeon', 'anesthesiologist', 'nurse'],
+      equipment: ['PTL Kit', 'Standard Surgery Set']
+    },
+    "Mini Facelift": {
+      duration: 180,
+      timeSlots: ['08:00', '13:00'],
+      requiredStaff: ['surgeon', 'nurse'],
+      equipment: ['Standard Surgery Set']
+    }
+  } as SurgicalProcedures,
+  minimal: {
+    "Botox": {
+      duration: 30,
+      timeSlots: ['09:00', '09:30', '10:00', '10:30', '11:00', '14:00', '14:30', '15:00', '15:30'],
+      requiredStaff: ['doctor'],
+      equipment: ['Botox Kit']
+    }
+  } as MinimalProcedures,
+  consultation: {
+    duration: 30,
+    timeSlots: ['09:00', '09:30', '10:00', '10:30', '11:00', '14:00', '14:30', '15:00', '15:30']
+  } as ConsultationType
+} as const;
+
+export type ProcedureTypes = typeof PROCEDURE_TYPES;
