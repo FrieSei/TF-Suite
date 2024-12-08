@@ -1,6 +1,7 @@
 "use client";
 
 import { format, isValid, parseISO } from "date-fns";
+import { AppointmentType } from "@/types/calendar";
 import { useAppointments } from "@/hooks/use-appointments";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -118,7 +119,7 @@ export function AppointmentList({
               No appointments scheduled for this date
             </p>
           ) : (
-            appointments.map((appointment) => {
+            appointments.map((appointment: AppointmentType) => {
               const eventType = EVENT_TYPES[appointment.event_type.code];
               return (
                 <div
