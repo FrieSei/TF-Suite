@@ -93,3 +93,14 @@ export const EVENT_TYPES: Record<string, EventType> = {
     category: CalendarType.SURGERY,
   },
 } as const;
+
+export interface AppointmentType {
+  id: string;
+  patient_name: string;
+  start_time: string;
+  end_time: string;
+  status: string;
+  event_type: {
+    code: string;
+  };
+}
