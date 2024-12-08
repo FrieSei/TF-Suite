@@ -76,19 +76,22 @@ export function AppointmentForm({ onSuccess, selectedDate }: AppointmentFormProp
   };
 
   const onAppointmentTypeChange = (type: AppointmentType) => {
-    setSelectedType(type);
-    const procedures = getProceduresForType(type);
-    form.setValue('procedure', procedures[0]);
-    
-    if (type === 'consultation') {
-      form.setValue('duration', PROCEDURE_TYPES.consultation.duration);
-    } else {
-      // Type-safe access to procedures
-      const procedureKey = procedures[0] as string & keyof typeof PROCEDURE_TYPES[typeof type];
-      const procedure = PROCEDURE_TYPES[type][procedureKey];
-      form.setValue('duration', procedure.duration);
-    }
-  };
+  setSelectedType(type);
+  const procedures = getProceduresForType(type);
+  form.setValue('procedure', procedures[0]);
+  
+  if (type === 'consultation') {
+    form.setValue('duration', PROCEDURE_TYPES.consultation.duration);
+  } else if (type === 'surgery') {
+    const procedureKey = procedures[0] as keyof typeof PROCEDURE_TYPES.surgery;
+    const procedure = PROCEDURE_TYPES.surgery[procedureKey];
+    form.setValue('duration', procedure.duration);
+  } else {
+    const procedureKey = procedures[0] as keyof typeof PROCEDURE_TYPES.minimal;
+    const procedure = PROCEDURE_TYPES.minimal[procedureKey];
+    form.setValue('duration', procedure.duration);
+  }
+};
 
   // Rest of the component remains the same...
   // [Previous return statement and form JSX remains unchanged]
