@@ -249,7 +249,7 @@ export default function InvitationResponse() {
             <Button
               type="submit"
               className="w-full"
-              disabled={!canSubmit || status === "loading"} // Fixed type-safe comparison
+              disabled={!canSubmit || status === "loading"}
             >
               {status === "loading" ? (
                 <>
