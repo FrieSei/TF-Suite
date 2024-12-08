@@ -17,7 +17,7 @@ import { EVENT_TYPES } from "@/types/calendar";
 import { useMemo } from "react";
 
 interface AppointmentListProps {
-  date: Date | null; // Keeps the 'date' prop as is
+  date: Date | null; // Ensures the prop matches the usage
   surgeonId?: string;
   location?: string;
   onAppointmentClick?: (appointmentId: string) => void;
