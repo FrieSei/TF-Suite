@@ -260,11 +260,3 @@ export default function InvitationResponse() {
     "Complete Setup"
   )}
 </Button>
-
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
