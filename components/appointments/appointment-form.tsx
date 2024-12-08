@@ -72,6 +72,18 @@ export function AppointmentForm({ onSuccess, selectedDate }: AppointmentFormProp
     : Object.keys(PROCEDURE_TYPES.minimal);
 };
 
+  const getTimeSlotsForProcedure = (type: AppointmentType, procedureName: string) => {
+  if (type === 'consultation') {
+    return PROCEDURE_TYPES.consultation.timeSlots;
+  } else if (type === 'surgery') {
+    const procedure = PROCEDURE_TYPES.surgery[procedureName as keyof typeof PROCEDURE_TYPES.surgery];
+    return procedure?.timeSlots || [];
+  } else {
+    const procedure = PROCEDURE_TYPES.minimal[procedureName as keyof typeof PROCEDURE_TYPES.minimal];
+    return procedure?.timeSlots || [];
+  }
+};
+  
   const onAppointmentTypeChange = (type: AppointmentType) => {
     setSelectedType(type);
     const procedures = getProceduresForType(type);
