@@ -22,7 +22,7 @@ interface AppointmentWizardProps {
 export function AppointmentWizard({ surgeonId, onComplete, onCancel }: AppointmentWizardProps) {
   const queryClient = useQueryClient();
   const [step, setStep] = useState(1);
-  const [data, setData] = useState<WizardData>({
+  const [data, setData] = useState<Partial<WizardData>>({
     eventTypeId: '',
     duration: 0,
     date: null,
