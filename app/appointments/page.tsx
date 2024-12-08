@@ -17,9 +17,8 @@ export default function AppointmentsPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
 
-  // Wrapper function to handle type conversion
   const handleDateSelect = (day: Date | undefined) => {
-    setSelectedDate(day || null); // Convert undefined to null
+    setSelectedDate(day || null); // Convert `undefined` to `null` for consistency
   };
 
   return (
@@ -37,17 +36,18 @@ export default function AppointmentsPage() {
           <Calendar
             mode="single"
             selected={selectedDate || undefined}
-            onSelect={handleDateSelect} // Use wrapper function
+            onSelect={handleDateSelect}
             className="rounded-md border"
           />
         </div>
-        <AppointmentList selectedDate={selectedDate} />
+        {/* Ensure the correct prop name is passed */}
+        <AppointmentList date={selectedDate} />
       </div>
 
       <CreateAppointmentDialog
         open={isCreateModalOpen}
         onOpenChange={setIsCreateModalOpen}
-        selectedDate={selectedDate}
+        selectedDate={selectedDate} // Ensure this matches your dialog component props
       />
     </div>
   );
