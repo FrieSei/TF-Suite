@@ -106,64 +106,65 @@ export function AppointmentWizard({ surgeonId, onComplete, onCancel }: Appointme
       case 1:
         return (
           <div className="space-y-4">
-            {renderField('location', (
-              <>
-                <label className="text-sm font-medium">Location</label>
-                <Select
-                  value={data.location}
-                  onValueChange={(value: LocationType) => setData({ ...data, location: value })}
-                >
-                  <Select.Trigger>
-                    <Select.Value placeholder="Select location" />
-                  </Select.Trigger>
-                  <<Select.Content>
-                    <Select.Item value={LocationType.VIENNA}>Vienna</Select.Item>
-                    <Select.Item value={LocationType.GRAZ}>Graz</Select.Item>
-                    <Select.Item value={LocationType.LINZ}>Linz</Select.Item>
-                    <Select.Item value={LocationType.MUNICH}>Munich</Select.Item>
-                  </Select.Content>
-              </>
-            ))}
+           {renderField('location', (
+  <>
+    <label className="text-sm font-medium">Location</label>
+    <Select
+      value={data.location}
+      onValueChange={(value: LocationType) => setData({ ...data, location: value })}
+    >
+      <Select.Trigger>
+        <Select.Value placeholder="Select location" />
+      </Select.Trigger>
+      <Select.Content>
+        <Select.Item value={LocationType.VIENNA}>Vienna</Select.Item>
+        <Select.Item value={LocationType.GRAZ}>Graz</Select.Item>
+        <Select.Item value={LocationType.LINZ}>Linz</Select.Item>
+        <Select.Item value={LocationType.MUNICH}>Munich</Select.Item>
+      </Select.Content>
+    </Select>
+  </>
+))}
 
-            {renderField('eventTypeId', (
-              <>
-                <label className="text-sm font-medium">Procedure Type</label>
-                <Select
-                  value={data.eventTypeId}
-                  onValueChange={(value) => setData({ ...data, eventTypeId: value, duration: 0 })}
-                >
-                  <Select.Trigger>
-                    <Select.Value placeholder="Select procedure type" />
-                  </Select.Trigger>
-                  <Select.Content>
-                    <Select.Item value="consultation">Consultation</Select.Item>
-                    <Select.Item value="surgery">Surgery</Select.Item>
-                    <Select.Item value="followup">Follow-up</Select.Item>
-                  <Select.Content>
-                </Select>
-              </>
-            ))}
+{renderField('eventTypeId', (
+  <>
+    <label className="text-sm font-medium">Procedure Type</label>
+    <Select
+      value={data.eventTypeId}
+      onValueChange={(value) => setData({ ...data, eventTypeId: value, duration: 0 })}
+    >
+      <Select.Trigger>
+        <Select.Value placeholder="Select procedure type" />
+      </Select.Trigger>
+      <Select.Content>
+        <Select.Item value="consultation">Consultation</Select.Item>
+        <Select.Item value="surgery">Surgery</Select.Item>
+        <Select.Item value="followup">Follow-up</Select.Item>
+      </Select.Content>
+    </Select>
+  </>
+))}
 
-            {data.eventTypeId && renderField('duration', (
-              <>
-                <label className="text-sm font-medium">Duration</label>
-                <Select
-                  value={data.duration.toString()}
-                  onValueChange={(value) => setData({ ...data, duration: parseInt(value) })}
-                >
-                  <Select.Trigger>
-                    <Select.Value placeholder="Select duration" />
-                  </Select.Trigger>
-                  <Select.Content>
-                    <Select.Item value="30">30 minutes</Select.Item>
-                    <Select.Item value="60">1 hour</Select.Item>
-                    <Select.Item value="90">1.5 hours</Select.Item>
-                    <Select.Item value="120">2 hours</Select.Item>
-                  </Select.Content>
-                </Select>
-              </>
-            ))}
-          </div>
+{data.eventTypeId && renderField('duration', (
+  <>
+    <label className="text-sm font-medium">Duration</label>
+    <Select
+      value={data.duration.toString()}
+      onValueChange={(value) => setData({ ...data, duration: parseInt(value) })}
+    >
+      <Select.Trigger>
+        <Select.Value placeholder="Select duration" />
+      </Select.Trigger>
+      <Select.Content>
+        <Select.Item value="30">30 minutes</Select.Item>
+        <Select.Item value="60">1 hour</Select.Item>
+        <Select.Item value="90">1.5 hours</Select.Item>
+        <Select.Item value="120">2 hours</Select.Item>
+      </Select.Content>
+    </Select>
+  </>
+))}        
+</div>
         );
 
       default:
