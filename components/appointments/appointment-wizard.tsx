@@ -58,25 +58,36 @@ export function AppointmentWizard({ surgeonId, onComplete, onCancel }: Appointme
   };
 
   const handleSubmit = async () => {
-    clearErrors();
+  clearErrors();
+  
+  if (!data.date || !data.time || !data.location || 
+      !data.duration || !data.eventTypeId) {
+    return;
+  }
 
-    const isValid = await validateWizardData(data);
-    if (!isValid) return;
+  const isValid = await validateWizardData({
+    date: data.date,
+    time: data.time,
+    location: data.location,
+    duration: data.duration,
+    eventTypeId: data.eventTypeId,
+    notes: data.notes
+  });
 
-    if (!data.date || !data.time) return;
+  if (!isValid) return;
 
-    const [hours, minutes] = data.time.split(':').map(Number);
-    const startTime = new Date(data.date);
-    startTime.setHours(hours, minutes, 0, 0);
+  const [hours, minutes] = data.time.split(':').map(Number);
+  const startTime = new Date(data.date);
+  startTime.setHours(hours, minutes, 0, 0);
 
-    onComplete({
-      eventTypeId: data.eventTypeId,
-      startTime,
-      duration: data.duration,
-      location: data.location,
-      notes: data.notes
-    });
-  };
+  onComplete({
+    eventTypeId: data.eventTypeId,
+    startTime,
+    duration: data.duration,
+    location: data.location,
+    notes: data.notes
+  });
+};
 
   const renderField = (name: keyof WizardData, component: React.ReactNode) => {
     const error = getFieldError(name);
