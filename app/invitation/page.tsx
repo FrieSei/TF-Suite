@@ -39,6 +39,7 @@ export default function InvitationResponse() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [userData, setUserData] = useState<UserData | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const meetsRequirements = passwordRequirements.map((req) => ({
     ...req,
@@ -47,7 +48,7 @@ export default function InvitationResponse() {
 
   const allRequirementsMet = meetsRequirements.every((req) => req.isMet);
   const passwordsMatch = password === confirmPassword;
-  const canSubmit = allRequirementsMet && passwordsMatch && password.length > 0;
+  const canSubmit = allRequirementsMet && passwordsMatch && password.length > 0 && !isSubmitting;
 
   useEffect(() => {
     const validateInvitation = async () => {
@@ -85,7 +86,7 @@ export default function InvitationResponse() {
     e.preventDefault();
 
     if (!canSubmit || !userData) return;
-    setStatus("submitting");
+    setIsSubmitting(true);
 
     try {
       const token = new URLSearchParams(window.location.search).get("invitation_token");
@@ -106,17 +107,19 @@ export default function InvitationResponse() {
     } catch (error: any) {
       setStatus("error");
       setMessage(error.message || "Failed to set up account. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  if (status === "loading" || status === "submitting") {
+  if (status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Card className="w-full max-w-md">
           <CardContent className="p-6">
             <div className="flex items-center justify-center space-x-2">
               <Loader2 className="h-6 w-6 animate-spin" />
-              <span>{status === "loading" ? "Validating invitation..." : "Setting up account..."}</span>
+              <span>Validating invitation...</span>
             </div>
           </CardContent>
         </Card>
@@ -176,8 +179,8 @@ export default function InvitationResponse() {
                 <AlertDescription>{message}</AlertDescription>
               </Alert>
             )}
-            <Button type="submit" className="w-full" disabled={!canSubmit || status === "submitting"}>
-              {status === "submitting" ? (
+            <Button type="submit" className="w-full" disabled={!canSubmit}>
+              {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Setting up...
