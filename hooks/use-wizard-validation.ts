@@ -36,6 +36,11 @@ export function useWizardValidation() {
     setErrors([]);
   };
 
+interface ValidationHook {
+  validateWizardData: (data: Partial<WizardData>) => Promise<boolean>;
+  // ... other types
+}
+  
   return {
     errors,
     validateWizardStep,
