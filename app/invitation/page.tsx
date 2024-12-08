@@ -246,19 +246,21 @@ export default function InvitationResponse() {
               </Alert>
             )}
 
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={!canSubmit || status === "loading"}
-            >
-              {status === "loading" ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Setting up...
-                </>
-              ) : (
-                "Complete Setup"
-              )}
+<Button
+  type="submit"
+  className="w-full"
+  disabled={!canSubmit || status === "loading"}
+>
+  {status === "loading" ? (
+    <>
+      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+      Setting up...
+    </>
+  ) : (
+    "Complete Setup"
+  )}
+</Button>
+
             </Button>
           </form>
         </CardContent>
