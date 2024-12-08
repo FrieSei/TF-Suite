@@ -29,9 +29,10 @@ export default function AppointmentsPage() {
 
       <div className="grid gap-6 md:grid-cols-[400px_1fr]">
         <div className="space-y-6">
+          {/* Convert null to undefined for the Calendar's `selected` prop */}
           <Calendar
             mode="single"
-            selected={selectedDate}
+            selected={selectedDate || undefined}
             onSelect={setSelectedDate}
             className="rounded-md border"
           />
