@@ -5,7 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Select } from '@/components/ui/select';
 import { useWizardValidation } from '@/hooks/use-wizard-validation';
 import { WizardData } from '@/lib/validations/appointment';
-import { LocationType } from '@/types/calendar';
+import { LocationType } from '@/types/enums';  // Change from calendar to enums
 
 interface AppointmentWizardProps {
   surgeonId?: string;
@@ -99,7 +99,7 @@ export function AppointmentWizard({ surgeonId, onComplete, onCancel }: Appointme
         )}
       </div>
     );
-  };
+  };  
 
   const renderStep = () => {
     switch (step) {
@@ -116,12 +116,12 @@ export function AppointmentWizard({ surgeonId, onComplete, onCancel }: Appointme
                   <Select.Trigger>
                     <Select.Value placeholder="Select location" />
                   </Select.Trigger>
-                  <Select.Content>
-                    <Select.Item value="Vienna">Vienna</Select.Item>
-                    <Select.Item value="Graz">Graz</Select.Item>
-                    <Select.Item value="Linz">Linz</Select.Item>
+                  <<Select.Content>
+                    <Select.Item value={LocationType.VIENNA}>Vienna</Select.Item>
+                    <Select.Item value={LocationType.GRAZ}>Graz</Select.Item>
+                    <Select.Item value={LocationType.LINZ}>Linz</Select.Item>
+                    <Select.Item value={LocationType.MUNICH}>Munich</Select.Item>
                   </Select.Content>
-                </Select>
               </>
             ))}
 
@@ -139,7 +139,7 @@ export function AppointmentWizard({ surgeonId, onComplete, onCancel }: Appointme
                     <Select.Item value="consultation">Consultation</Select.Item>
                     <Select.Item value="surgery">Surgery</Select.Item>
                     <Select.Item value="followup">Follow-up</Select.Item>
-                  </Select.Content>
+                  <Select.Content>
                 </Select>
               </>
             ))}
