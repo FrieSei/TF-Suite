@@ -15,9 +15,6 @@ export enum LocationType {
   PRACTICE = 'practice',
   HOSPITAL = 'hospital',
   REMOTE = 'remote',
-}
-
-export enum LocationType {
   VIENNA = 'Vienna',
   LINZ = 'Linz',
   MUNICH = 'Munich',
