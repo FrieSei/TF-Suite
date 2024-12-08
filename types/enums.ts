@@ -17,3 +17,9 @@ export enum LocationType {
   REMOTE = 'remote',
 }
 
+export enum LocationType {
+  VIENNA = 'Vienna',
+  LINZ = 'Linz',
+  MUNICH = 'Munich',
+  GRAZ = 'Graz'
+}
