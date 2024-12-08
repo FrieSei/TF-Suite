@@ -16,6 +16,33 @@ export interface Appointment {
   created_at: string;
 }
 
+// Define the structure for procedures
+type ProcedureInfo = {
+  duration: number;
+  timeSlots: string[];
+  requiredStaff: string[];
+  equipment: string[];
+};
+
+// Define consultation type separately as it has a different structure
+type ConsultationType = {
+  duration: number;
+  timeSlots: string[];
+  requiredStaff?: string[];
+  equipment?: string[];
+};
+
+// Define specific procedure types for each category
+type SurgicalProcedures = {
+  "Deep Plane Facelift": ProcedureInfo;
+  "Mini Facelift": ProcedureInfo;
+};
+
+type MinimalProcedures = {
+  "Botox": ProcedureInfo;
+};
+
+// Define the complete procedure types structure
 export const PROCEDURE_TYPES = {
   surgery: {
     "Deep Plane Facelift": {
@@ -30,7 +57,7 @@ export const PROCEDURE_TYPES = {
       requiredStaff: ['surgeon', 'nurse'],
       equipment: ['Standard Surgery Set']
     }
-  },
+  } as SurgicalProcedures,
   minimal: {
     "Botox": {
       duration: 30,
@@ -38,9 +65,12 @@ export const PROCEDURE_TYPES = {
       requiredStaff: ['doctor'],
       equipment: ['Botox Kit']
     }
-  },
+  } as MinimalProcedures,
   consultation: {
     duration: 30,
     timeSlots: ['09:00', '09:30', '10:00', '10:30', '11:00', '14:00', '14:30', '15:00', '15:30']
-  }
-};
+  } as ConsultationType
+} as const;
+
+// Export the type of PROCEDURE_TYPES for use in other files
+export type ProcedureTypes = typeof PROCEDURE_TYPES;
