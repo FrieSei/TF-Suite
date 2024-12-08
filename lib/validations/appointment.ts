@@ -41,31 +41,21 @@ export const AppointmentSchema = z.object({
 );
 
 // Wizard step schemas
-export const WizardStepSchemas = {
-  1: z.object({
-    eventTypeId: z.string().min(1, "Please select a procedure"),
-    duration: z.number().positive("Please select a valid duration"),
-    location: LocationTypeSchema
-  }),
-  
-  2: z.object({
-    date: z.date({
-      required_error: "Please select a date",
-      invalid_type_error: "Invalid date format"
-    })
-  }),
-  
-  3: z.object({
-    time: z.string().regex(
-      /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/,
-      "Please select a valid time"
-    )
-  }),
-  
-  4: z.object({
-    notes: z.string().optional()
-  })
-};
+export const WizardDataSchema = z.object({
+  eventTypeId: z.string().min(1, "Please select a procedure"),
+  duration: z.number().positive("Please select a valid duration"),
+  date: z.date({
+    required_error: "Please select a date",
+    invalid_type_error: "Invalid date format"
+  }).nullable(),
+  time: z.string().regex(
+    /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/,
+    "Please select a valid time"
+  ).nullable(),
+  location: LocationTypeSchema,
+  notes: z.string().optional()
+});
+
 
 // Complete wizard data schema
 export const WizardDataSchema = z.object({
