@@ -1,5 +1,4 @@
-"use client";
-
+// useWizardValidation.ts
 import { useState } from 'react';
 import { 
   validateStep, 
@@ -21,8 +20,9 @@ export function useWizardValidation() {
     return validationErrors.length === 0;
   };
 
-  const validateWizardData = async (data: WizardData): Promise<boolean> => {
-    const validationErrors = await validateCompleteData(data);
+  // Change this to accept Partial<WizardData>
+  const validateWizardData = async (data: Partial<WizardData>): Promise<boolean> => {
+    const validationErrors = await validateCompleteData(data as WizardData);
     setErrors(validationErrors);
     return validationErrors.length === 0;
   };
@@ -35,11 +35,6 @@ export function useWizardValidation() {
   const clearErrors = () => {
     setErrors([]);
   };
-
-interface ValidationHook {
-  validateWizardData: (data: Partial<WizardData>) => Promise<boolean>;
-  // ... other types
-}
   
   return {
     errors,
