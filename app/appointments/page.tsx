@@ -17,6 +17,11 @@ export default function AppointmentsPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
 
+  // Wrapper function to handle type conversion
+  const handleDateSelect = (day: Date | undefined) => {
+    setSelectedDate(day || null); // Convert undefined to null
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -29,11 +34,10 @@ export default function AppointmentsPage() {
 
       <div className="grid gap-6 md:grid-cols-[400px_1fr]">
         <div className="space-y-6">
-          {/* Convert null to undefined for the Calendar's `selected` prop */}
           <Calendar
             mode="single"
             selected={selectedDate || undefined}
-            onSelect={setSelectedDate}
+            onSelect={handleDateSelect} // Use wrapper function
             className="rounded-md border"
           />
         </div>
