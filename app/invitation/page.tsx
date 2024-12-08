@@ -247,20 +247,18 @@ export default function InvitationResponse() {
             )}
 
             <Button
-  type="submit"
-  className="w-full"
-  disabled={!canSubmit || (status as string) === "loading"} // Add explicit type assertion
->
-  {(status as string) === "loading" ? ( // Add explicit type assertion
-    <>
-      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-      Setting up...
-    </>
-  ) : (
-    "Complete Setup"
-  )}
-</Button>
-
+              type="submit"
+              className="w-full"
+              disabled={!canSubmit || status === "loading"} // Fixed type-safe comparison
+            >
+              {status === "loading" ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Setting up...
+                </>
+              ) : (
+                "Complete Setup"
+              )}
             </Button>
           </form>
         </CardContent>
