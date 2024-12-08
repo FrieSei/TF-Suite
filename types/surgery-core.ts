@@ -4,7 +4,8 @@ export enum SurgeryStatus {
   READY = 'READY',
   BLOCKED = 'BLOCKED',
   COMPLETED = 'COMPLETED',
-  CANCELLED = 'CANCELLED'
+  CANCELLED = 'CANCELLED',
+  CONSULTATION_COMPLETED = 'CONSULTATION_COMPLETED', // Add this
 }
 
 export enum PTLType {
