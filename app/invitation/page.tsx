@@ -240,23 +240,29 @@ export default function InvitationResponse() {
               </div>
             </div>
 
-            {status === "success" && (
+              {status === "success" && (
               <Alert>
                 <AlertDescription>{message}</AlertDescription>
               </Alert>
             )}
 
-<Button
-  type="submit"
-  className="w-full"
-  disabled={!canSubmit || status === "loading"}
->
-  {status === "loading" ? (
-    <>
-      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-      Setting up...
-    </>
-  ) : (
-    "Complete Setup"
-  )}
-</Button>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={!canSubmit || status === "loading"}
+            >
+              {status === "loading" ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Setting up...
+                </>
+              ) : (
+                "Complete Setup"
+              )}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
