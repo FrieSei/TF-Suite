@@ -34,6 +34,9 @@ jobs:
         rm -rf .next
         npm install
 
+    - name: Audit and fix vulnerabilities
+      run: npm audit fix
+
     - name: Build
       run: npm run build
       env:
