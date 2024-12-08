@@ -66,9 +66,11 @@ export function AppointmentForm({ onSuccess, selectedDate }: AppointmentFormProp
   });
 
   const getProceduresForType = (type: AppointmentType) => {
-    if (type === 'consultation') return ['Initial Consultation'];
-    return Object.keys(PROCEDURE_TYPES[type]);
-  };
+  if (type === 'consultation') return ['Initial Consultation'];
+  return type === 'surgery' 
+    ? Object.keys(PROCEDURE_TYPES.surgery)
+    : Object.keys(PROCEDURE_TYPES.minimal);
+};
 
   const onAppointmentTypeChange = (type: AppointmentType) => {
     setSelectedType(type);
@@ -231,18 +233,11 @@ export function AppointmentForm({ onSuccess, selectedDate }: AppointmentFormProp
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {selectedType === 'consultation' 
-                      ? PROCEDURE_TYPES.consultation.timeSlots.map((time) => (
-                          <SelectItem key={time} value={time}>
-                            {time}
-                          </SelectItem>
-                        ))
-                      : PROCEDURE_TYPES[selectedType][form.getValues('procedure')]?.timeSlots.map((time) => (
-                          <SelectItem key={time} value={time}>
-                            {time}
-                          </SelectItem>
-                        ))
-                    }
+                    {getTimeSlotsForProcedure(selectedType, form.getValues('procedure')).map((time) => (
+                      <SelectItem key={time} value={time}>
+                        {time}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />
