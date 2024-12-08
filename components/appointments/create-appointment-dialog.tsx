@@ -13,13 +13,15 @@ import { useToast } from "@/components/ui/use-toast";
 interface CreateAppointmentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  surgeonId?: string;  // Added the ? here
+  surgeonId?: string;
+  selectedDate?: Date | null; // Added selectedDate to props
 }
 
 export function CreateAppointmentDialog({
   open,
   onOpenChange,
   surgeonId,
+  selectedDate,
 }: CreateAppointmentDialogProps) {
   const { toast } = useToast();
 
@@ -30,14 +32,17 @@ export function CreateAppointmentDialog({
     location: LocationType;
   }) => {
     try {
+      // Use the selectedDate if provided, otherwise use the appointment.startTime
+      const startTime = selectedDate || appointment.startTime;
+
       // Here you would integrate with your appointment creation API
-      // const response = await createAppointment({ ...appointment, surgeonId });
-      
+      // const response = await createAppointment({ ...appointment, startTime, surgeonId });
+
       toast({
         title: "Success",
         description: "Appointment scheduled successfully",
       });
-      
+
       onOpenChange(false);
     } catch (error: any) {
       toast({
