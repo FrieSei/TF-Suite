@@ -15,36 +15,33 @@ jobs:
         node-version: [18.x]
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
 
-    - name: Print Node.js and npm versions
-      run: |
-        node -v
-        npm -v
+      - name: Print Node.js and npm versions
+        run: |
+          node -v
+          npm -v
 
-    - name: Install dependencies
-      run: |
-        rm -rf node_modules
-        rm -rf .next
-        npm install
+      - name: Install dependencies
+        run: |
+          rm -rf node_modules
+          rm -rf .next
+          npm install
 
-    - name: Audit and fix vulnerabilities
-      run: npm audit fix
+      - name: Audit and fix vulnerabilities (force if needed)
+        run: npm audit fix --force
 
-    - name: Build
-      run: npm run build
-      env:
-        NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      - name: Lint
+        run: npm run lint
 
-    - name: Lint
-      run: npm run lint
-
-    - name: Audit and fix vulnerabilities
-      run: npm audit fix --force
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
