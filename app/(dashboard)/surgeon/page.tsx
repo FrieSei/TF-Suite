@@ -1,14 +1,14 @@
 "use client";
 
-import { useQuery } from '@tanstack/react-query';
-import { format, startOfDay, endOfDay } from 'date-fns';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Calendar, Users, Clock, AlertCircle } from 'lucide-react';
-import { AppointmentList } from '@/components/appointments/appointment-list';
-import { CreateAppointmentDialog } from '@/components/appointments/create-appointment-dialog';
-import { useAuth } from '@/contexts/auth-context';
-import { useState } from 'react';
+import { useQuery } from "@tanstack/react-query";
+import { format, startOfDay, endOfDay } from "date-fns";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Calendar, Users, Clock, AlertCircle } from "lucide-react";
+import { AppointmentList } from "@/components/appointments/appointment-list";
+import { CreateAppointmentDialog } from "@/components/appointments/create-appointment-dialog";
+import { useAuth } from "@/contexts/auth-context";
+import { useState } from "react";
 
 export default function SurgeonDashboard() {
   const { user } = useAuth();
@@ -16,10 +16,10 @@ export default function SurgeonDashboard() {
   const today = new Date();
 
   const { data: stats } = useQuery({
-    queryKey: ['surgeon-stats', user?.id],
+    queryKey: ["surgeon-stats", user?.id],
     queryFn: async () => {
       const response = await fetch(`/api/surgeons/${user?.id}/stats`);
-      if (!response.ok) throw new Error('Failed to fetch stats');
+      if (!response.ok) throw new Error("Failed to fetch stats");
       return response.json();
     },
     enabled: !!user?.id,
@@ -27,7 +27,7 @@ export default function SurgeonDashboard() {
 
   const metrics = [
     {
-      title: "Today's Appointments",
+      title: "Today&#39;s Appointments",
       value: stats?.todayAppointments || 0,
       description: `${stats?.surgeries || 0} surgeries, ${stats?.consultations || 0} consultations`,
       icon: Calendar,
@@ -40,8 +40,10 @@ export default function SurgeonDashboard() {
     },
     {
       title: "Next Appointment",
-      value: stats?.nextAppointment ? format(new Date(stats.nextAppointment.time), 'HH:mm') : '--:--',
-      description: stats?.nextAppointment?.type || 'No upcoming appointments',
+      value: stats?.nextAppointment
+        ? format(new Date(stats.nextAppointment.time), "HH:mm")
+        : "--:--",
+      description: stats?.nextAppointment?.type || "No upcoming appointments",
       icon: Clock,
     },
     {
@@ -83,13 +85,10 @@ export default function SurgeonDashboard() {
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Today's Schedule</CardTitle>
+            <CardTitle>Today&#39;s Schedule</CardTitle>
           </CardHeader>
           <CardContent>
-            <AppointmentList
-              date={today}
-              surgeonId={user?.id}
-            />
+            <AppointmentList date={today} surgeonId={user?.id} />
           </CardContent>
         </Card>
 
