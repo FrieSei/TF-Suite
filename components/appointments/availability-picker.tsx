@@ -51,7 +51,7 @@ export function AvailabilityPicker({
       endDate.setDate(endDate.getDate() + 7); // Fetch a week's worth of slots
       fetchAvailableSlots(selectedDate, endDate, duration);
     }
-  }, [selectedDate, duration]);
+  }, [selectedDate, duration, fetchAvailableSlots]);
 
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
