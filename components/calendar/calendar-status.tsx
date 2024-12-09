@@ -6,6 +6,27 @@ import { ConnectCalendar } from './connect-calendar';
 import { Button } from '@/components/ui/button';
 import { Calendar, CheckCircle, XCircle } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { useCallback } from 'react';
+
+const fetchCalendarStatus = useCallback(async () => {
+  try {
+    const response = await fetch(`/api/calendar/tokens?userId=${userId}`);
+    const data = await response.json();
+    if (response.ok && data.data) {
+      setCredentials(data.data);
+    }
+  } catch (error) {
+    console.error('Error fetching calendar status:', error);
+  } finally {
+    setIsLoading(false);
+  }
+}, [userId]);
+
+useEffect(() => {
+  fetchCalendarStatus();
+}, [fetchCalendarStatus]);
+
+
 
 interface CalendarStatusProps {
   userId: string;
