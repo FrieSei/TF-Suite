@@ -15,21 +15,18 @@ export function VoiceNoteRecorder({ onTranscript, isDisabled }: VoiceNoteRecorde
   const [recognition, setRecognition] = useState<any>(null);
   const { toast } = useToast();
 
-  useEffect(() => {
-    if (typeof window !== 'undefined' && 'webkitSpeechRecognition' in window) {
-      const recognition = new (window as any).webkitSpeechRecognition();
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      recognition.lang = 'de-DE'; // German language
+useEffect(() => {
+  if (typeof window !== 'undefined' && 'webkitSpeechRecognition' in window) {
+    const tempRecognition = new (window as any).webkitSpeechRecognition();
+    tempRecognition.continuous = true;
+    ...
+    setRecognition(tempRecognition);
 
-      recognition.onresult = (event: any) => {
-        const transcript = Array.from(event.results)
-          .map((result: any) => result[0])
-          .map((result: any) => result.transcript)
-          .join(' ');
-        
-        onTranscript(transcript);
-      };
+    return () => {
+      tempRecognition.stop();
+    };
+  }
+}, [onTranscript, toast]);
 
       recognition.onerror = (event: any) => {
         console.error('Speech recognition error:', event.error);
