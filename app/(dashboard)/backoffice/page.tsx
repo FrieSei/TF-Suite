@@ -1,8 +1,8 @@
 "use client";
 
-import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   Calendar,
   Users,
@@ -10,27 +10,27 @@ import {
   AlertCircle,
   Activity,
   Clock,
-} from 'lucide-react';
-import { AppointmentList } from '@/components/appointments/appointment-list';
-import { CreateAppointmentDialog } from '@/components/appointments/create-appointment-dialog';
-import { useState } from 'react';
+} from "lucide-react";
+import { AppointmentList } from "@/components/appointments/appointment-list";
+import { CreateAppointmentDialog } from "@/components/appointments/create-appointment-dialog";
+import { useState } from "react";
 
 export default function BackofficeDashboard() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const today = new Date();
 
   const { data: stats } = useQuery({
-    queryKey: ['backoffice-stats'],
+    queryKey: ["backoffice-stats"],
     queryFn: async () => {
-      const response = await fetch('/api/backoffice/stats');
-      if (!response.ok) throw new Error('Failed to fetch stats');
+      const response = await fetch("/api/backoffice/stats");
+      if (!response.ok) throw new Error("Failed to fetch stats");
       return response.json();
     },
   });
 
   const metrics = [
     {
-      title: "Today's Schedule",
+      title: "Today&#39;s Schedule",
       value: stats?.totalAppointments || 0,
       description: `${stats?.surgeries || 0} surgeries, ${stats?.consultations || 0} consultations`,
       icon: Calendar,
@@ -58,7 +58,9 @@ export default function BackofficeDashboard() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Back Office Dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight">
+          Back Office Dashboard
+        </h1>
         <Button onClick={() => setIsCreateDialogOpen(true)}>
           Schedule Appointment
         </Button>
@@ -86,7 +88,7 @@ export default function BackofficeDashboard() {
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Today's Appointments</CardTitle>
+            <CardTitle>Today&#39;s Appointments</CardTitle>
           </CardHeader>
           <CardContent>
             <AppointmentList date={today} />
@@ -97,9 +99,7 @@ export default function BackofficeDashboard() {
           <CardHeader>
             <CardTitle>Waiting Room</CardTitle>
           </CardHeader>
-          <CardContent>
-            {/* Add waiting room component here */}
-          </CardContent>
+          <CardContent>{/* Add waiting room component here */}</CardContent>
         </Card>
       </div>
 
@@ -108,18 +108,14 @@ export default function BackofficeDashboard() {
           <CardHeader>
             <CardTitle>Equipment Status</CardTitle>
           </CardHeader>
-          <CardContent>
-            {/* Add equipment status component here */}
-          </CardContent>
+          <CardContent>{/* Add equipment status component here */}</CardContent>
         </Card>
 
         <Card>
           <CardHeader>
             <CardTitle>Staff Schedule</CardTitle>
           </CardHeader>
-          <CardContent>
-            {/* Add staff schedule component here */}
-          </CardContent>
+          <CardContent>{/* Add staff schedule component here */}</CardContent>
         </Card>
       </div>
 
