@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { format } from "date-fns";
 import { Task, TaskStatus, TaskPriority } from "@/types/task";
 import {
@@ -30,14 +30,10 @@ export function TaskTimeline({ surgeryId }: TaskTimelineProps) {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchTasks();
-  }, [surgeryId]);
-
-  const fetchTasks = async () => {
+  const fetchTasks = useCallback(async () => {
     try {
       const response = await fetch(`/api/surgeries/${surgeryId}/tasks`);
-      if (!response.ok) throw new Error('Failed to fetch tasks');
+      if (!response.ok) throw new Error("Failed to fetch tasks");
       const data = await response.json();
       setTasks(data.tasks);
     } catch (error) {
@@ -49,17 +45,21 @@ export function TaskTimeline({ surgeryId }: TaskTimelineProps) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [surgeryId, toast]);
+
+  useEffect(() => {
+    fetchTasks();
+  }, [fetchTasks]);
 
   const handleStatusUpdate = async (taskId: string, status: TaskStatus) => {
     try {
       const response = await fetch(`/api/tasks/${taskId}/status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status })
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
       });
 
-      if (!response.ok) throw new Error('Failed to update task');
+      if (!response.ok) throw new Error("Failed to update task");
 
       await fetchTasks();
       toast({
@@ -95,14 +95,10 @@ export function TaskTimeline({ surgeryId }: TaskTimelineProps) {
       [TaskPriority.LOW]: "secondary",
       [TaskPriority.MEDIUM]: "default",
       [TaskPriority.HIGH]: "warning",
-      [TaskPriority.URGENT]: "destructive"
+      [TaskPriority.URGENT]: "destructive",
     };
 
-    return (
-      <Badge variant={variants[priority]}>
-        {priority.toLowerCase()}
-      </Badge>
-    );
+    return <Badge variant={variants[priority]}>{priority.toLowerCase()}</Badge>;
   };
 
   if (isLoading) {
@@ -140,16 +136,12 @@ export function TaskTimeline({ surgeryId }: TaskTimelineProps) {
                     : "#e5e7eb",
               }}
             >
-              <div className="flex-shrink-0 mt-1">
-                {getStatusIcon(task.status)}
-              </div>
+              <div className="flex-shrink-0 mt-1">{getStatusIcon(task.status)}</div>
               <div className="flex-grow space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
                     <h4 className="font-medium">{task.title}</h4>
-                    <p className="text-sm text-muted-foreground">
-                      {task.description}
-                    </p>
+                    <p className="text-sm text-muted-foreground">{task.description}</p>
                   </div>
                   <div className="flex items-center space-x-2">
                     {getPriorityBadge(task.priority)}
